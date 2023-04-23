@@ -62,13 +62,7 @@ void loop() {
     pirSensorValue = 0;
   }
 
-  time_t t = now();
-  // Serial.println(F(__DATE__));
-  Serial.print(hour(t));
-  Serial.print(":");
-  Serial.println(minute(t));
-
-  // seg.displayTime(hours, minutes);
+ // seg.displayTime(hours, minutes);
   seg.displayColon(1);
 
   // Wait for a short time to prevent rapid triggering of the sensor
