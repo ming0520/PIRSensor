@@ -9,7 +9,7 @@ void setup()
   Serial.begin(9600);
   Wire.begin();
   rtc.begin();
-  rtc.adjust(DateTime(F(__DATE__),F(__TIME__)));
+  // rtc.adjust(DateTime(F(__DATE__),F(__TIME__)));
   //rtc.adjust(DateTime(2019, 1, 21, 5, 0, 0));
 }
 void loop()

@@ -1,7 +1,12 @@
+// Arduino default library
+#include <Wire.h>
+
 // Download HT16K33 from Sketch > Include Library > Manage Libraries > Search HT16k33
-// Download DS3231 Library https://github.com/rodan/ds3231
-// Example for DS3231 https://drive.google.com/file/d/0B6k7-e-fDhSZZHpFdnhSbkdUSkU/view?resourcekey=0-RCOExE9Yk6Ac95vaqHy4uw
 #include <HT16K33.h>
+
+// Download & Install RTClib by Adafruit
+// https://circuitdigest.com/microcontroller-projects/interfacing-ds3231-rtc-with-arduino-and-diy-digital-clock
+#include <RTClib.h>
 
 // Define 7 segment display
 HT16K33  seg(0x70);
@@ -68,3 +73,10 @@ void loop() {
   // Wait for a short time to prevent rapid triggering of the sensor
   delay(500);
 }
+
+
+
+// ========================== Dont Use ===========================================
+// Download DS3231 Library https://github.com/rodan/ds3231
+// Example for DS3231 https://drive.google.com/file/d/0B6k7-e-fDhSZZHpFdnhSbkdUSkU/view?resourcekey=0-RCOExE9Yk6Ac95vaqHy4uw
+// ========================== Dont Use End ===========================================
