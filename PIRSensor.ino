@@ -1,17 +1,23 @@
 // Arduino default library
 #include <Wire.h>
 
-// Download HT16K33 from Sketch > Include Library > Manage Libraries > Search HT16k33
-#include <HT16K33.h>
+// // Download HT16K33 from Sketch > Include Library > Manage Libraries > Search HT16k33
+// #include <HT16K33.h>
 
 // Download & Install RTClib by Adafruit
 // https://circuitdigest.com/microcontroller-projects/interfacing-ds3231-rtc-with-arduino-and-diy-digital-clock
 #include <RTClib.h>
+RTC_DS3231 rtc;
+char t[32];
 
-// Define 7 segment display
-HT16K33  seg(0x70);
-uint32_t start, stop;
-uint8_t  ar[4];
+// Install Adafruit LiquidCrystal by Adafruit from Manage Libraries
+#include "Adafruit_LiquidCrystal.h"
+Adafruit_LiquidCrystal lcd(0);
+
+// // Define 7 segment display
+// HT16K33  seg(0x70);
+// uint32_t start, stop;
+// uint8_t  ar[4];
 
 // Define the PIR sensor input pin
 int pirSensorPin = A7;
@@ -19,8 +25,6 @@ int pirSensorPin = A7;
 // Define Buzzer output pin
 int buzzerPin = 8;
 
-RTC_DS3231 rtc;
-char t[32];
 
 // Arduino Code
 // void triggerAlarm(){
@@ -39,18 +43,19 @@ void setup() {
   pinMode(pirSensorPin, INPUT);
 
   // LED Segment Initialize
-  seg.begin();
-  Wire.setClock(100000);
+  // seg.begin();
+  // Wire.setClock(100000);
 
-  seg.displayOn();
+  // seg.displayOn();
 
-  seg.setDigits(4);
-  Serial.println("displayTest()");
-  seg.displayTest(1);
-  seg.displayOff();
-  delay(1000);
-  seg.displayOn();
-  seg.displayColon(false);
+  // seg.setDigits(4);
+  // Serial.println("displayTest()");
+  // seg.displayTest(1);
+  // seg.displayOff();
+  // delay(1000);
+  // seg.displayOn();
+  // seg.displayColon(false);
+  // END LED Segment Initialize
 
   // Arduino Code
   // Set the buzzer pin as output
@@ -59,6 +64,7 @@ void setup() {
 
 // for DS3231
   rtc.begin();
+
 }
 
 void loop() {
@@ -81,11 +87,6 @@ void loop() {
   } else { 
     pirSensorValue = 0;
   }
-
-  
-
- // seg.displayTime(hours, minutes);
-  seg.displayColon(1);
 
   // Wait for a short time to prevent rapid triggering of the sensor
   delay(500);
