@@ -13,7 +13,7 @@ char t[32];
 
 // Download LiquidCrystal I2C by Frank de
 #include <LiquidCrystal_I2C.h>
-LiquidCrystal_I2C lcd(0x27,16,2); 
+LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 // Define the PIR sensor input pin
 int pirSensorPin = A7;
@@ -21,20 +21,21 @@ int pirSensorPin = A7;
 // Define Buzzer output pin
 int BUZZER_PIN = 26;
 
+DateTime lastTriggerDate;
 
 int playing = 0;
 void tone(byte pin, int freq) {
-  ledcSetup(0, 2000, 8); // setup beeper
-  ledcAttachPin(pin, 0); // attach beeper
-  ledcWriteTone(0, freq); // play tone
-  playing = pin; // store pin
+  ledcSetup(0, 2000, 8);   // setup beeper
+  ledcAttachPin(pin, 0);   // attach beeper
+  ledcWriteTone(0, freq);  // play tone
+  playing = pin;           // store pin
 }
 void noTone() {
   tone(playing, 0);
 }
 
-// Arduino Code
-void triggerAlarm(){
+
+void triggerAlarm() {
   tone(BUZZER_PIN, 1000);  // High frequency
   delay(100);
   tone(BUZZER_PIN, 2000);  // Low frequency
@@ -45,9 +46,22 @@ void triggerAlarm(){
   delay(100);
   noTone();
 }
-// End Arduino Code
 
-DateTime lastTriggerDate;
+void refreshScreen() {
+  lcd.clear();
+  // DateTime now = rtc.now();
+  sprintf(d, "Date:%02d/%02d/%02d", lastTriggerDate.day(), lastTriggerDate.month(), lastTriggerDate.year());
+  sprintf(t, "%02d:%02d:%02d", lastTriggerDate.hour(), lastTriggerDate.minute(), lastTriggerDate.second());
+  Serial.print(F("Date/Time: "));
+  Serial.println(t);
+
+  lcd.setCursor(0, 0);
+  lcd.print(d);
+  lcd.setCursor(0, 1);
+  lcd.print(t);
+  // Wait for a short time to prevent rapid triggering of the sensor
+}
+
 void setup() {
   // Initialize serial communication for debugging
   Serial.begin(9600);
@@ -55,7 +69,7 @@ void setup() {
   // Set the PIR sensor pin as an input
   pinMode(pirSensorPin, INPUT);
 
-// for DS3231
+  // for DS3231
   rtc.begin();
   lcd.init();
   lastTriggerDate = rtc.now();
@@ -63,34 +77,21 @@ void setup() {
 
 void loop() {
   // Read the analog value from the PIR sensor
-  lcd.clear();
   int pirSensorValue = analogRead(pirSensorPin);
-  Serial.print("Sensor value: ");
-  Serial.print(pirSensorPin);
-  Serial.println();
-
-  // DateTime now = rtc.now();
-  sprintf(d,"%02d/%02d/%02d",lastTriggerDate.day(), lastTriggerDate.month(), lastTriggerDate.year());
-  sprintf(t, "%02d:%02d:%02d", lastTriggerDate.hour(), lastTriggerDate.minute(), lastTriggerDate.second());  
-  Serial.print(F("Date/Time: "));
-  Serial.println(t);
+  // Serial.print("Sensor value: ");
+  // Serial.print(pirSensorPin);
+  // Serial.println();
 
   // Convert the analog value to a digital value
   if (pirSensorValue > 512) {
     pirSensorValue = 1;
     Serial.println("Motion Detected!");
     lastTriggerDate = rtc.now();
+    refreshScreen();
     triggerAlarm();
-  } else { 
+  } else {
     pirSensorValue = 0;
   }
-  lcd.setCursor(0, 0);
-  lcd.print(d);
-  lcd.setCursor(0, 1);
-  lcd.print(t);
-  // Wait for a short time to prevent rapid triggering of the sensor
-  lcd.clear();
-
 }
 
 // ========================== Dont Use ===========================================
