@@ -36,14 +36,14 @@ void noTone() {
 
 
 void triggerAlarm() {
-  tone(BUZZER_PIN, 1000);  // High frequency
-  delay(100);
-  tone(BUZZER_PIN, 2000);  // Low frequency
-  delay(100);
-  tone(BUZZER_PIN, 1000);  // High frequency
-  delay(100);
-  tone(BUZZER_PIN, 2000);  // Low frequency
-  delay(100);
+  tone(BUZZER_PIN, 5000);  // High frequency
+  delay(300);
+  tone(BUZZER_PIN, 8000);  // Low frequency
+  delay(300);
+  tone(BUZZER_PIN, 5000);  // High frequency
+  delay(300);
+  tone(BUZZER_PIN, 8000);  // Low frequency
+  delay(300);
   noTone();
 }
 
@@ -51,7 +51,7 @@ void refreshScreen() {
   lcd.clear();
   // DateTime now = rtc.now();
   sprintf(d, "Date:%02d/%02d/%02d", lastTriggerDate.day(), lastTriggerDate.month(), lastTriggerDate.year());
-  sprintf(t, "%02d:%02d:%02d", lastTriggerDate.hour(), lastTriggerDate.minute(), lastTriggerDate.second());
+  sprintf(t, "Time:%02d:%02d:%02d", lastTriggerDate.hour(), lastTriggerDate.minute(), lastTriggerDate.second());
   Serial.print(F("Date/Time: "));
   Serial.println(t);
 
@@ -89,6 +89,7 @@ void loop() {
     lastTriggerDate = rtc.now();
     refreshScreen();
     triggerAlarm();
+    delay(500);
   } else {
     pirSensorValue = 0;
   }
