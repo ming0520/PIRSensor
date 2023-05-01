@@ -1,6 +1,6 @@
 // Arduino default library
 #include <Wire.h>
-
+#include <SPI.h>
 // // Download HT16K33 from Sketch > Include Library > Manage Libraries > Search HT16k33
 // #include <HT16K33.h>
 
@@ -22,6 +22,25 @@ int pirSensorPin = A7;
 int BUZZER_PIN = 26;
 
 DateTime lastTriggerDate;
+
+
+#include <WiFi.h>
+const char* ssid = "Tan Wifi@unifi";
+const char* password = "59301357";
+
+#include <WiFiClient.h>
+WiFiClient client;
+
+// Download and install thinkspeak
+// https://github.com/mathworks/thingspeak-arduino
+#include "ThingSpeak.h"
+unsigned long myChannelNumber = 2119655;
+const char * myWriteAPIKey = "BAKK01E3G8207XN4";
+
+const char* host = "api.thingspeak.com";
+const int httpsPort = 443;
+const String apiKey = "BAKK01E3G8207XN4";
+
 
 int playing = 0;
 void tone(byte pin, int freq) {
@@ -50,15 +69,15 @@ void triggerAlarm() {
 void refreshScreen() {
   lcd.clear();
   // DateTime now = rtc.now();
-  sprintf(d, "Date:%02d/%02d/%02d", lastTriggerDate.day(), lastTriggerDate.month(), lastTriggerDate.year());
-  sprintf(t, "Time:%02d:%02d:%02d", lastTriggerDate.hour(), lastTriggerDate.minute(), lastTriggerDate.second());
+  sprintf(d, "%02d-%02d-%02d", lastTriggerDate.year(), lastTriggerDate.month(),lastTriggerDate.day());
+  sprintf(t, "%02d:%02d:%02d", lastTriggerDate.hour(), lastTriggerDate.minute(), lastTriggerDate.second());
   Serial.print(F("Date/Time: "));
   Serial.println(t);
 
   lcd.setCursor(0, 0);
-  lcd.print(d);
+  lcd.print("Date:"+String(d));
   lcd.setCursor(0, 1);
-  lcd.print(t);
+  lcd.print("Time:"+String(t));
   // Wait for a short time to prevent rapid triggering of the sensor
 }
 
@@ -73,6 +92,31 @@ void setup() {
   rtc.begin();
   lcd.init();
   lastTriggerDate = rtc.now();
+
+    WiFi.mode(WIFI_STA); //Optional
+    WiFi.begin(ssid, password);
+    Serial.println("\nConnecting");
+
+    while(WiFi.status() != WL_CONNECTED){
+        Serial.print(".");
+        delay(100);
+    }
+
+    Serial.println("\nConnected to the WiFi network");
+    Serial.print("Local ESP32 IP: ");
+    Serial.println(WiFi.localIP());
+
+    ThingSpeak.begin(client);
+
+      // Use WiFiClientSecure for HTTPS
+    WiFiClient client;
+
+    // Connect to the server
+    if (!client.connect(host, httpsPort)) {
+      Serial.println("Connection failed");
+      return;
+    }
+
 }
 
 void loop() {
@@ -85,15 +129,46 @@ void loop() {
   // Convert the analog value to a digital value
   if (pirSensorValue > 512) {
     pirSensorValue = 1;
-    Serial.println("Motion Detected!");
     lastTriggerDate = rtc.now();
+    Serial.print("Motion Detected! ");
     refreshScreen();
     triggerAlarm();
-    delay(500);
+    // Serial.println(String(d)+"T"+String(t)+"Z");
+  
+    // Write to ThingSpeak. There are up to 8 fields in a channel, allowing you to store up to 8 different
+    // pieces of information in a channel.  Here, we write to field 1.
+    // int y = ThingSpeak.setCreatedAt(String(d)+" "+String(t));
+    // if(y == 200){
+    //   Serial.println("setCreatedAt update successful.");
+    // }
+    // else{
+    //   Serial.println("Problem updating setCreatedAt. HTTP error code " + String(y));
+    // }
+    int x = ThingSpeak.writeField(myChannelNumber, 1, 1 ,  myWriteAPIKey);
+    // String createdDate = String(d)+"T"+String(t)+"Z";
+    // int x = ThingSpeak.writeRaw(6,"https://api.thingspeak.com/update.json?api_key=BAKK01E3G8207XN4&field5=1&created_at="+createdDate)
+    if(x == 200){
+      Serial.println("Channel update successful.");
+    }
+    else{
+      Serial.println("Problem updating channel. HTTP error code " + String(x));
+    }
+    
+    // Wait for the response
+    delay(1000);
+    while (client.available()) {
+      Serial.write(client.read());
+    }
+
+      // Update ThingSpeak
+  // Print Update Response to Serial Monitor
+
+      delay(500);
   } else {
     pirSensorValue = 0;
   }
 }
+
 
 // ========================== Dont Use ===========================================
 // Download DS3231 Library https://github.com/rodan/ds3231
